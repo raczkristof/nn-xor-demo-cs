@@ -15,6 +15,8 @@ namespace nn_xor_demo_cs
     {
         public Plot()
         {
+            // Main body. Handle console interaction from here.
+
             InitializeComponent();
 
             Console.WriteLine("Hello World!");
