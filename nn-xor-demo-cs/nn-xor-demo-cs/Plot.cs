@@ -5,7 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -13,21 +13,52 @@ namespace nn_xor_demo_cs
 {
     public partial class Plot : Form
     {
+        private bool isRunning; // Track if the user exited the program vie the console.
+        Thread consoleThread; // Thread for reading console commands.
+
+        // Delegate to pass back the console commands to the main thread
+        // One thread can§t run a while loop to watch the console and also
+        // perform the actions at the same time.
+        private delegate void ConsoleCmd(string cmd);
+
         public Plot()
         {
-            // Main body. Handle console interaction from here.
-
             InitializeComponent();
 
-            Console.WriteLine("Hello World!");
+            isRunning = true;
 
-            string cmd = Console.ReadLine();
-
-            if (cmd == "plot")
-                DrawTestPlot();
+            // Start up a thread to watch for console commands,
+            // so the main thread can execute commands.
+            ConsoleCmd d = new ConsoleCmd(HandleConsoleCmd);
+            consoleThread = new Thread(() => {
+                while (isRunning)
+                {
+                    string cmd = Console.ReadLine();
+                    this.Invoke(d, cmd);
+                }
+            });
+            consoleThread.Start();
         }
 
-        private void DrawTestPlot()
+        // Parse console commands
+        private void HandleConsoleCmd(string cmd)
+        {
+            switch (cmd)
+            {
+                case "plot":
+                    DrawPlot();
+                    break;
+                case "exit":
+                    consoleThread.Abort();
+                    this.Close();
+                    break;
+                default:
+                    Console.WriteLine("\"" + cmd + "\" is not a valid command.");
+                    break;
+            }
+        }
+
+        private void DrawPlot()
         {
             chart1.Series.Clear();
 
