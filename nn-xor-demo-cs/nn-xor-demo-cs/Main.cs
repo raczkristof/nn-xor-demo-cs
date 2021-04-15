@@ -21,6 +21,9 @@ namespace nn_xor_demo_cs
         // perform the actions at the same time. 
         private delegate void ConsoleCmd(string cmd);
 
+        double[,] trainingInput; // Data to be used as input to the NN
+        double[] trainingLabels; // Labels of the input data
+
         public Main()
         {
             InitializeComponent();
@@ -130,8 +133,27 @@ namespace nn_xor_demo_cs
                     Console.WriteLine("You asked to plot \"" + plotType + "\". It is not a known plot type.");
                     break;
             }
+        }
+        private void GenerateXORData(int n)
+        {
+            trainingInput = new double[n, 2];
+            trainingLabels = new double[n];
 
+            Random rnd = new Random();
 
+            for (int i = 0; i < n; i++)
+            {
+                double x = rnd.NextDouble();
+                double y = rnd.NextDouble();
+
+                trainingInput[i, 0] = x;
+                trainingInput[i, 1] = y;
+
+                if ((x + rnd.NextDouble() * 0.1 > 0.5) ^ (y + rnd.NextDouble() * 0.1 > 0.5)) // ^ is XOR operator. added random is used to fuzz edges a bit (false labeling)
+                    trainingLabels[i] = 1;
+                else
+                    trainingLabels[i] = 0;
+            }
         }
     }
 }
