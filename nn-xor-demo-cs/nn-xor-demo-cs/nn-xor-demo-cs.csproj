@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activations.cs" />
     <Compile Include="Plot.cs">
       <SubType>Form</SubType>
     </Compile>
