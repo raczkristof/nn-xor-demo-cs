@@ -24,6 +24,8 @@ namespace nn_xor_demo_cs
         double[,] trainingInput; // Data to be used as input to the NN
         double[] trainingLabels; // Labels of the input data
 
+        const int TrainingDataNum = 500; // Number of training datapoints.
+
         public Main()
         {
             InitializeComponent();
@@ -94,7 +96,6 @@ namespace nn_xor_demo_cs
                 case "ident":
                     chart1.SetActivationPlot("Identity", input, input.Identity());
                     break;
-
                 case "ident.deriv":
                     chart1.SetActivationPlot("Derivate of Identity", input, input.Identity(deriv: true));
                     break;
@@ -102,33 +103,38 @@ namespace nn_xor_demo_cs
                 case "sigmoid":
                     chart1.SetActivationPlot("Sigmoid", input, input.Sigmoid());
                     break;
-
                 case "sigmoid.deriv":
                     chart1.SetActivationPlot("Derivate of Sigmoid", input, input.Sigmoid(deriv: true));
                     break;
+
                 case "tanh":
                     chart1.SetActivationPlot("tanH", input, input.TanH());
                     break;
-
                 case "tanh.deriv":
                     chart1.SetActivationPlot("Derivate of tanH", input, input.TanH(deriv: true));
                     break;
+
                 case "relu":
                     chart1.SetActivationPlot("ReLU", input, input.ReLU());
                     break;
-
                 case "relu.deriv":
                     chart1.SetActivationPlot("Derivate of ReLU", input, input.ReLU(deriv: true));
                     break;
+
                 case "lrelu":
                     chart1.SetActivationPlot("Leaky ReLU", input, input.LReLU(alpha: 0.5));
                     Console.WriteLine("alpha = 0.5 on plot");
                     break;
-
                 case "lrelu.deriv":
                     chart1.SetActivationPlot("Derivate of leaky ReLU", input, input.LReLU(alpha: 0.5, deriv: true));
                     Console.WriteLine("alpha = 0.5 on plot");
                     break;
+
+                case "trainData":
+                    if (trainingLabels == null) GenerateXORData(TrainingDataNum);
+                    chart1.SetDataPlot(trainingInput, trainingLabels);
+                    break;
+
                 default:
                     Console.WriteLine("You asked to plot \"" + plotType + "\". It is not a known plot type.");
                     break;
@@ -149,7 +155,7 @@ namespace nn_xor_demo_cs
                 trainingInput[i, 0] = x;
                 trainingInput[i, 1] = y;
 
-                if ((x + rnd.NextDouble() * 0.1 > 0.5) ^ (y + rnd.NextDouble() * 0.1 > 0.5)) // ^ is XOR operator. added random is used to fuzz edges a bit (false labeling)
+                if ((x - 0.05 + rnd.NextDouble() * 0.1 > 0.5) ^ (y - 0.05 + rnd.NextDouble() * 0.1 > 0.5)) // ^ is XOR operator. added random is used to fuzz edges a bit (false labeling)
                     trainingLabels[i] = 1;
                 else
                     trainingLabels[i] = 0;
