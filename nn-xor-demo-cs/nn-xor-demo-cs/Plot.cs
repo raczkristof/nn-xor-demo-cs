@@ -65,7 +65,7 @@ namespace nn_xor_demo_cs
 
         private void DrawPlot(string plotType)
         {
-            double[] input = Enumerable.Range(-100, 201).Select(x => x / 100.0).ToArray();
+            double[] input = Enumerable.Range(-500, 1001).Select(x => x / 100.0).ToArray();
             
             switch (plotType)
             {
@@ -88,16 +88,46 @@ namespace nn_xor_demo_cs
                     break;
                 }
 
-                case "unity":
-                    chart1.SetActivationPlot("Unity", input, input.Unity());
+                case "ident":
+                    chart1.SetActivationPlot("Identity", input, input.Identity());
                     break;
 
-                case "unity.deriv":
-                    chart1.SetActivationPlot("Derivate of Unity", input, input.Unity(deriv: true));
+                case "ident.deriv":
+                    chart1.SetActivationPlot("Derivate of Identity", input, input.Identity(deriv: true));
                     break;
 
+                case "sigmoid":
+                    chart1.SetActivationPlot("Sigmoid", input, input.Sigmoid());
+                    break;
+
+                case "sigmoid.deriv":
+                    chart1.SetActivationPlot("Derivate of Sigmoid", input, input.Sigmoid(deriv: true));
+                    break;
+                case "tanh":
+                    chart1.SetActivationPlot("tanH", input, input.TanH());
+                    break;
+
+                case "tanh.deriv":
+                    chart1.SetActivationPlot("Derivate of tanH", input, input.TanH(deriv: true));
+                    break;
+                case "relu":
+                    chart1.SetActivationPlot("ReLU", input, input.ReLU());
+                    break;
+
+                case "relu.deriv":
+                    chart1.SetActivationPlot("Derivate of ReLU", input, input.ReLU(deriv: true));
+                    break;
+                case "lrelu":
+                    chart1.SetActivationPlot("Leaky ReLU", input, input.LReLU(alpha: 0.5));
+                    Console.WriteLine("alpha = 0.5 on plot");
+                    break;
+
+                case "lrelu.deriv":
+                    chart1.SetActivationPlot("Derivate of leaky ReLU", input, input.LReLU(alpha: 0.5, deriv: true));
+                    Console.WriteLine("alpha = 0.5 on plot");
+                    break;
                 default:
-                    Console.WriteLine("You asked to plot \"" + plotType + "\" is not a known plot type.");
+                    Console.WriteLine("You asked to plot \"" + plotType + "\". It is not a known plot type.");
                     break;
             }
 

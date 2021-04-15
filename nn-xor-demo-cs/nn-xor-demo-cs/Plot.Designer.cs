@@ -65,7 +65,7 @@ namespace nn_xor_demo_cs
             this.MinimumSize = new System.Drawing.Size(300, 300);
             this.Name = "Plot";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
-            this.Text = "Form1";
+            this.Text = "Plot window";
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);
 

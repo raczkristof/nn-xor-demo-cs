@@ -33,17 +33,11 @@ namespace nn_xor_demo_cs
             series.Points.AddXYpoints(input, output);
 
             chart.Legends[0].Enabled = false; //Turn off legends
-            chart.ChartAreas[0].AxisX.Minimum = -1; //Set X minimum
-            chart.ChartAreas[0].AxisX.Maximum = 1; //Set X maximum
-            chart.ChartAreas[0].AxisX.MajorGrid.Interval = 1.0;
-            chart.ChartAreas[0].AxisX.MajorTickMark.Interval = 0.25;
-            chart.ChartAreas[0].AxisX.Interval = 0.25;
-
-            chart.ChartAreas[0].AxisY.Minimum = -1; //Set X minimum
-            chart.ChartAreas[0].AxisY.Maximum = 1; //Set X maximum
-            chart.ChartAreas[0].AxisY.MajorGrid.Interval = 1.0;
-            chart.ChartAreas[0].AxisY.MajorTickMark.Interval = 0.25;
-            chart.ChartAreas[0].AxisX.Interval = 0.25;
+            chart.ChartAreas[0].AxisX.Minimum = -5; //Set X minimum
+            chart.ChartAreas[0].AxisX.Maximum = 5; //Set X maximum
+            chart.ChartAreas[0].AxisX.MajorGrid.Interval = 5.0;
+            chart.ChartAreas[0].AxisX.MajorTickMark.Interval = 1;
+            chart.ChartAreas[0].AxisX.Interval = 1;
         }
     }
 }
