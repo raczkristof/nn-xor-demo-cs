@@ -11,24 +11,24 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace nn_xor_demo_cs
 {
-    public partial class Plot : Form
+    public partial class Main : Form
     {
-        private bool isRunning; // Track if the user exited the program vie the console.
-        Thread consoleThread; // Thread for reading console commands.
+        private bool isRunning; // Track if the user exited the program vie the console. 
+        Thread consoleThread; // Thread for reading console commands. 
 
-        // Delegate to pass back the console commands to the main thread
-        // One thread can§t run a while loop to watch the console and also
-        // perform the actions at the same time.
+        // Delegate to pass back the console commands to the main thread 
+        // One thread can§t run a while loop to watch the console and also 
+        // perform the actions at the same time. 
         private delegate void ConsoleCmd(string cmd);
 
-        public Plot()
+        public Main()
         {
             InitializeComponent();
 
             isRunning = true;
 
-            // Start up a thread to watch for console commands,
-            // so the main thread can execute commands.
+            // Start up a thread to watch for console commands, 
+            // so the main thread can execute commands. 
             ConsoleCmd d = new ConsoleCmd(HandleConsoleCmd);
             consoleThread = new Thread(() => {
                 while (isRunning)
@@ -40,13 +40,13 @@ namespace nn_xor_demo_cs
             consoleThread.Start();
         }
 
-        // Parse console commands
+        // Parse console commands 
         private void HandleConsoleCmd(string cmd)
         {
-            // See if the input is a plot command
-            if (Regex.IsMatch(cmd, @"plot\(.*\)"))  // use regex to match "plot(*)"
+            // See if the input is a plot command 
+            if (Regex.IsMatch(cmd, @"plot\(.*\)"))  // use regex to match "plot(*)" 
             {
-                DrawPlot(cmd.Substring(5, cmd.Length-6));
+                DrawPlot(cmd.Substring(5, cmd.Length - 6));
             }
             else
             {
@@ -66,27 +66,27 @@ namespace nn_xor_demo_cs
         private void DrawPlot(string plotType)
         {
             double[] input = Enumerable.Range(-500, 1001).Select(x => x / 100.0).ToArray();
-            
+
             switch (plotType)
             {
                 case "":
-                {
-                    chart1.Series.Clear();
-                    chart1.Titles.Clear();
+                    {
+                        chart1.Series.Clear();
+                        chart1.Titles.Clear();
 
-                    chart1.Titles.Add("Total Income");
+                        chart1.Titles.Add("Total Income");
 
-                    Series series = chart1.Series.Add("Total Income");
-                    series.ChartType = SeriesChartType.Spline;
-                    series.Points.AddXY("September", 100);
-                    series.Points.AddXY("Obtober", 300);
-                    series.Points.AddXY("November", 800);
-                    series.Points.AddXY("December", 200);
-                    series.Points.AddXY("January", 600);
-                    series.Points.AddXY("February", 400);
+                        Series series = chart1.Series.Add("Total Income");
+                        series.ChartType = SeriesChartType.Spline;
+                        series.Points.AddXY("September", 100);
+                        series.Points.AddXY("Obtober", 300);
+                        series.Points.AddXY("November", 800);
+                        series.Points.AddXY("December", 200);
+                        series.Points.AddXY("January", 600);
+                        series.Points.AddXY("February", 400);
 
-                    break;
-                }
+                        break;
+                    }
 
                 case "ident":
                     chart1.SetActivationPlot("Identity", input, input.Identity());
@@ -131,7 +131,7 @@ namespace nn_xor_demo_cs
                     break;
             }
 
-            
+
         }
     }
 }
