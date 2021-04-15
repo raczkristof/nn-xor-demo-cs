@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -43,35 +43,65 @@ namespace nn_xor_demo_cs
         // Parse console commands
         private void HandleConsoleCmd(string cmd)
         {
-            switch (cmd)
+            // See if the input is a plot command
+            if (Regex.IsMatch(cmd, @"plot\(.*\)"))  // use regex to match "plot(*)"
             {
-                case "plot":
-                    DrawPlot();
-                    break;
-                case "exit":
-                    consoleThread.Abort();
-                    this.Close();
-                    break;
-                default:
-                    Console.WriteLine("\"" + cmd + "\" is not a valid command.");
-                    break;
+                DrawPlot(cmd.Substring(5, cmd.Length-6));
+            }
+            else
+            {
+                switch (cmd)
+                {
+                    case "exit":
+                        consoleThread.Abort();
+                        this.Close();
+                        break;
+                    default:
+                        Console.WriteLine("\"" + cmd + "\" is not a valid command.");
+                        break;
+                }
             }
         }
 
-        private void DrawPlot()
+        private void DrawPlot(string plotType)
         {
-            chart1.Series.Clear();
+            double[] input = Enumerable.Range(-100, 201).Select(x => x / 100.0).ToArray();
+            
+            switch (plotType)
+            {
+                case "":
+                {
+                    chart1.Series.Clear();
+                    chart1.Titles.Clear();
 
-            chart1.Titles.Add("Total Income");
+                    chart1.Titles.Add("Total Income");
 
-            Series series = chart1.Series.Add("Total Income");
-            series.ChartType = SeriesChartType.Spline;
-            series.Points.AddXY("September", 100);
-            series.Points.AddXY("Obtober", 300);
-            series.Points.AddXY("November", 800);
-            series.Points.AddXY("December", 200);
-            series.Points.AddXY("January", 600);
-            series.Points.AddXY("February", 400);
+                    Series series = chart1.Series.Add("Total Income");
+                    series.ChartType = SeriesChartType.Spline;
+                    series.Points.AddXY("September", 100);
+                    series.Points.AddXY("Obtober", 300);
+                    series.Points.AddXY("November", 800);
+                    series.Points.AddXY("December", 200);
+                    series.Points.AddXY("January", 600);
+                    series.Points.AddXY("February", 400);
+
+                    break;
+                }
+
+                case "unity":
+                    chart1.SetActivationPlot("Unity", input, input.Unity());
+                    break;
+
+                case "unity.deriv":
+                    chart1.SetActivationPlot("Derivate of Unity", input, input.Unity(deriv: true));
+                    break;
+
+                default:
+                    Console.WriteLine("You asked to plot \"" + plotType + "\" is not a known plot type.");
+                    break;
+            }
+
+            
         }
     }
 }

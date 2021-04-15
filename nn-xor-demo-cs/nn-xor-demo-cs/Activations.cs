@@ -18,10 +18,10 @@ namespace nn_xor_demo_cs
 
             if (deriv)
                 output = (from value in input
-                          select value).ToArray();
+                          select 1.0).ToArray();
             else
                 output = (from value in input
-                          select 1.0).ToArray();
+                          select value).ToArray();
 
             return output;
         }
