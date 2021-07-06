@@ -26,9 +26,13 @@ namespace nn_xor_demo_cs
 
         const int TrainingDataNum = 500; // Number of training datapoints.
 
+        NNModel model; // Neural Network model
+
         public Main()
         {
             InitializeComponent();
+
+            model = new NNModel(2, new int[] { 5, 13, 24, 7, 1 }, new ActivationFunctions[] { ActivationFunctions.Sigmoid, ActivationFunctions.Sigmoid, ActivationFunctions.Sigmoid, ActivationFunctions.Sigmoid, ActivationFunctions.Sigmoid });
 
             isRunning = true;
 
@@ -60,6 +64,9 @@ namespace nn_xor_demo_cs
                     case "testDotProduct":
                         TestDot();
                         break;
+                    case "resetWeights":
+                        model.ResetWeights();
+                        break;
                     case "exit":
                         consoleThread.Abort();
                         this.Close();
@@ -73,7 +80,10 @@ namespace nn_xor_demo_cs
 
         private void DrawPlot(string plotType)
         {
-            double[] input = Enumerable.Range(-500, 1001).Select(x => x / 100.0).ToArray();
+            double[] tmp = Enumerable.Range(-500, 1001).Select(x => x / 100.0).ToArray();
+            double[,] input = new double[1, tmp.Length];
+
+            for (int i = 0; i < tmp.Length; i++) input[0, i] = tmp[i];
 
             switch (plotType)
             {
@@ -97,45 +107,54 @@ namespace nn_xor_demo_cs
                     }
 
                 case "ident":
-                    chart1.SetActivationPlot("Identity", input, input.Identity());
+                    chart1.SetActivationPlot("Identity", input.Flatten(), input.Identity().Flatten());
                     break;
                 case "ident.deriv":
-                    chart1.SetActivationPlot("Derivate of Identity", input, input.Identity(deriv: true));
+                    chart1.SetActivationPlot("Derivate of Identity", input.Flatten(), input.Identity(deriv: true).Flatten());
                     break;
 
                 case "sigmoid":
-                    chart1.SetActivationPlot("Sigmoid", input, input.Sigmoid());
+                    chart1.SetActivationPlot("Sigmoid", input.Flatten(), input.Sigmoid().Flatten());
                     break;
                 case "sigmoid.deriv":
-                    chart1.SetActivationPlot("Derivate of Sigmoid", input, input.Sigmoid(deriv: true));
+                    chart1.SetActivationPlot("Derivate of Sigmoid", input.Flatten(), input.Sigmoid(deriv: true).Flatten());
                     break;
 
                 case "tanh":
-                    chart1.SetActivationPlot("tanH", input, input.TanH());
+                    chart1.SetActivationPlot("tanH", input.Flatten(), input.TanH().Flatten());
                     break;
                 case "tanh.deriv":
-                    chart1.SetActivationPlot("Derivate of tanH", input, input.TanH(deriv: true));
+                    chart1.SetActivationPlot("Derivate of tanH", input.Flatten(), input.TanH(deriv: true).Flatten());
                     break;
 
                 case "relu":
-                    chart1.SetActivationPlot("ReLU", input, input.ReLU());
+                    chart1.SetActivationPlot("ReLU", input.Flatten(), input.ReLU().Flatten());
                     break;
                 case "relu.deriv":
-                    chart1.SetActivationPlot("Derivate of ReLU", input, input.ReLU(deriv: true));
+                    chart1.SetActivationPlot("Derivate of ReLU", input.Flatten(), input.ReLU(deriv: true).Flatten());
                     break;
 
                 case "lrelu":
-                    chart1.SetActivationPlot("Leaky ReLU", input, input.LReLU(alpha: 0.5));
+                    chart1.SetActivationPlot("Leaky ReLU", input.Flatten(), input.LReLU(alpha: 0.5).Flatten());
                     Console.WriteLine("alpha = 0.5 on plot");
                     break;
                 case "lrelu.deriv":
-                    chart1.SetActivationPlot("Derivate of leaky ReLU", input, input.LReLU(alpha: 0.5, deriv: true));
+                    chart1.SetActivationPlot("Derivate of leaky ReLU", input.Flatten(), input.LReLU(alpha: 0.5, deriv: true).Flatten());
                     Console.WriteLine("alpha = 0.5 on plot");
                     break;
 
                 case "trainData":
                     if (trainingLabels == null) GenerateXORData(TrainingDataNum);
                     chart1.SetDataPlot(trainingInput, trainingLabels);
+                    break;
+                case "predictData":
+                    if (trainingLabels == null) GenerateXORData(TrainingDataNum);
+                    if (model == null)
+                    {
+                        Console.WriteLine("No network initialised.");
+                        break;
+                    }
+                    chart1.SetDataPlot(trainingInput, model.Predict(trainingInput).Flatten());
                     break;
 
                 default:
@@ -145,7 +164,7 @@ namespace nn_xor_demo_cs
         }
         private void GenerateXORData(int n)
         {
-            trainingInput = new double[n, 2];
+            trainingInput = new double[2, n];
             trainingLabels = new double[n];
 
             Random rnd = new Random();
@@ -155,8 +174,8 @@ namespace nn_xor_demo_cs
                 double x = rnd.NextDouble();
                 double y = rnd.NextDouble();
 
-                trainingInput[i, 0] = x;
-                trainingInput[i, 1] = y;
+                trainingInput[0, i] = x;
+                trainingInput[1, i] = y;
 
                 if ((x - 0.05 + rnd.NextDouble() * 0.1 > 0.5) ^ (y - 0.05 + rnd.NextDouble() * 0.1 > 0.5)) // ^ is XOR operator. added random is used to fuzz edges a bit (false labeling)
                     trainingLabels[i] = 1;
@@ -195,7 +214,7 @@ namespace nn_xor_demo_cs
             Console.WriteLine("Testing Dot product of 2 matrices");
 
             double[,] matrixLeft = new double[,] { { 42, 2 }, { 5, 7} };
-            Console.WriteLine(String.Format("matrixLEft is [{0} {1}; {2} {3}]", matrixLeft[0, 0], matrixLeft[0, 1], matrixLeft[1, 0], matrixLeft[1, 1]));
+            Console.WriteLine(String.Format("matrixLeft is [{0} {1}; {2} {3}]", matrixLeft[0, 0], matrixLeft[0, 1], matrixLeft[1, 0], matrixLeft[1, 1]));
 
             double[,] matrixRight = new double[,] { { 3, 54 }, { 5, 9 } };
             Console.WriteLine(String.Format("matrixRight is [{0} {1}; {2} {3}]", matrixRight[0, 0], matrixRight[0, 1], matrixRight[1, 0], matrixRight[1, 1]));

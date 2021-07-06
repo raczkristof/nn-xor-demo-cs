@@ -58,14 +58,16 @@ namespace nn_xor_demo_cs
             foreach (NNLayer layer in layers) layer.RandomizeWeights(rnd);
         }
 
-        //public double[] Predict(double[,] inputs)
-        //{
-        //    layers[0].Propagate(inputs);
-        //    for (int i = 1; i < layers.Length; i++)
-        //    {
-        //        layers[i].Propagate(layers[i-1].output);
-        //    }
-        //}
+        public double[,] Predict(double[,] inputs)
+        {
+            layers[0].Propagate(inputs);
+            for (int i = 1; i < layers.Length; i++)
+            {
+                layers[i].Propagate(layers[i - 1].output);
+            }
+
+            return layers.Last().output;
+        }
     }
 
     public class NNLayer
@@ -90,19 +92,17 @@ namespace nn_xor_demo_cs
         {
             // See if we recieved the correct dimension of input.
             // if bias = true, it gets converted to 1, else it gets converted to 0.
-            if (inputs.GetLength(0) != nInputs + Convert.ToInt32(bias)) throw new ArgumentException("Number of inputs does not equal the specified input size of the layer.");
+            if (inputs.GetLength(0) != nInputs) throw new ArgumentException("Number of inputs does not equal the specified input size of the layer.");
             else
             {
-                //if (bias) output = Extensions.DotProduct(weights, inputs.Append(1.0).ToArray()).Activate(activationType);
-                //else output = Extensions.DotProduct(weights, inputs).Activate(activationType);
+                if (bias) output = Extensions.DotProduct(weights, inputs.AppendRowOnes()).Activate(activationType);
+                else output = Extensions.DotProduct(weights, inputs).Activate(activationType);
             }
-
-            //inputs.
         }
 
         public void RandomizeWeights(Random rnd)
         {
-            for (int i = 0; i < weights.Length; i++) weights[i % weights.GetLength(0), i / weights.GetLength(1)] = rnd.NextDouble();
+            for (int i = 0; i < weights.Length; i++) weights[i % weights.GetLength(0), i / weights.GetLength(0)] = rnd.NextDouble() * 2 -1;
         }
     }
 
@@ -120,96 +120,104 @@ namespace nn_xor_demo_cs
         //Unity activation function.The implementation is inefficient, but represents
         //the nature of an activation function better then "return input". Shows the
         //general implementation scheme for using LINQ to perform the calcualtion on
-        //all elemnts of the array.
-        public static double[] Identity(this double[] input, bool deriv = false)
+        //all elements of the array.
+        public static double[,] Identity(this double[,] input, bool deriv = false)
         {
-            double[] output;
+            double[,] output = new double[input.GetLength(0), input.GetLength(1)];
 
-            if (deriv)
-                output = (from x in input
-                          select 1.0).ToArray();
-            else
-                output = (from x in input
-                          select x).ToArray();
-
-            return output;
-        }
-
-        public static double[] Sigmoid(this double[] input, bool deriv = false)
-        {
-            double[] output;
-
-            if (deriv)
-                output = (from x in input
-                          select Math.Exp(-x) / Math.Pow(1 + Math.Exp(-x), 2)).ToArray();
-            else
-                output = (from x in input
-                          select 1 / (1 + Math.Exp(-x))).ToArray();
-
-            return output;
-        }
-
-        public static double[] TanH(this double[] input, bool deriv = false)
-        {
-            double[] output;
-
-            if (deriv)
-                output = (from x in input
-                          select 1 - Math.Tanh(x) * Math.Tanh(x)).ToArray();
-            else
-                output = (from x in input
-                          select Math.Tanh(x)).ToArray();
-
-            return output;
-        }
-
-        public static double[] ReLU(this double[] input, bool deriv = false)
-        {
-            double[] output = new double[input.Length];
-
-            for (int i = 0; i < input.Length; i++)
-            {
-                if (input[i] < 0) output[i] = 0;
-                else
+            for (int i = 0; i < input.GetLength(0); i++)
+                for (int j = 0; j < input.GetLength(1); j++)
                 {
                     if (deriv)
-                        output[i] = 1.0;
+                        output[i, j] = 1.0;
                     else
-                        output[i] = input[i];
+                        output[i, j] = input[i, j];
                 }
-            }
 
             return output;
         }
 
-        public static double[] LReLU(this double[] input, double alpha, bool deriv = false)
+        public static double[,] Sigmoid(this double[,] input, bool deriv = false)
         {
-            double[] output = new double[input.Length];
+            double[,] output = new double[input.GetLength(0), input.GetLength(1)];
 
-            for (int i = 0; i < input.Length; i++)
-            {
-                if (input[i] < 0)
+            for (int i = 0; i < input.GetLength(0); i++)
+                for (int j = 0; j < input.GetLength(1); j++)
                 {
                     if (deriv)
-                        output[i] = alpha;
+                        output[i, j] = Math.Exp(-input[i, j]) / Math.Pow(1 + Math.Exp(-input[i, j]), 2);
                     else
-                        output[i] = alpha * input[i];
+                        output[i, j] = 1 / (1 + Math.Exp(-input[i, j]));
                 }
-                else
-                {
-                    if (deriv)
-                        output[i] = 1.0;
-                    else
-                        output[i] = input[i];
-                }
-            }
 
             return output;
         }
 
-        public static double[] Activate(this double[] input, ActivationFunctions activationType)
+        public static double[,] TanH(this double[,] input, bool deriv = false)
         {
-            double[] output;
+            double[,] output = new double[input.GetLength(0), input.GetLength(1)];
+
+            for (int i = 0; i < input.GetLength(0); i++)
+                for (int j = 0; j < input.GetLength(1); j++)
+                {
+                    if (deriv)
+                        output[i, j] = 1 - Math.Tanh(input[i, j]) * Math.Tanh(input[i, j]);
+                    else
+                        output[i, j] = Math.Tanh(input[i, j]);
+                }
+
+            return output;
+        }
+
+        public static double[,] ReLU(this double[,] input, bool deriv = false)
+        {
+            double[,] output = new double[input.GetLength(0), input.GetLength(1)];
+
+            for (int i = 0; i < input.GetLength(0); i++)
+                for (int j = 0; j < input.GetLength(1); j++)
+                {
+                    if (input[i, j] < 0) output[i, j] = 0;
+                    else
+                    {
+                        if (deriv)
+                            output[i, j] = 1.0;
+                        else
+                            output[i, j] = input[i, j];
+                    }
+                }
+
+            return output;
+        }
+
+        public static double[,] LReLU(this double[,] input, double alpha, bool deriv = false)
+        {
+            double[,] output = new double[input.GetLength(0), input.GetLength(1)];
+
+            for (int i = 0; i < input.GetLength(0); i++)
+                for (int j = 0; j < input.GetLength(1); j++)
+                {
+                    if (input[i, j] < 0)
+                    {
+                        if (deriv)
+                            output[i, j] = alpha;
+                        else
+                            output[i, j] = alpha * input[i, j];
+                    }
+                    else
+                    {
+                        if (deriv)
+                            output[i, j] = 1.0;
+                        else
+                            output[i, j] = input[i, j];
+                    }
+                }
+
+            return output;
+        }
+
+        public static double[,] Activate(this double[,] input, ActivationFunctions activationType)
+        {
+            double[,] output;
 
             switch (activationType)
             {
@@ -236,9 +244,9 @@ namespace nn_xor_demo_cs
             return output;
         }
 
-        public static double[] Derivative(this double[] input, ActivationFunctions activationType)
+        public static double[,] Derivative(this double[,] input, ActivationFunctions activationType)
         {
-            double[] output;
+            double[,] output;
 
             switch (activationType)
             {
