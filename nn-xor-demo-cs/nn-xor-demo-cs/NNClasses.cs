@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -55,6 +55,43 @@ namespace nn_xor_demo_cs
             }
 
             return output;
+        }
+
+        public void BackProp(double[] trueLabels, double lr)
+        {
+            double[] predLabels = layers.Last().GetOutput().Flatten();
+            double cost = Extensions.BinaryCrossEntropy(trueLabels, predLabels);
+
+            double[] tmp = Enumerable.Range(0, trueLabels.Length).Select(i => (trueLabels[i]/predLabels[i] - (1 - trueLabels[i]) / (1 - predLabels[i])) * (- 1)).ToArray();
+            double[,] err = new double[tmp.Length, 1];
+
+            for (int i = 0; i < tmp.Length; i++) err[i, 0] = tmp[i];
+
+            for (int i = layers.Length - 1; i >= 0; i--)
+            {
+                double[,] dactivation = Extensions.DotProduct(layers[i].inputs, layers[i].weights).Derivative(layers[i].activationType);
+                double[,] delta = Extensions.Multiply(err, dactivation);
+
+                double[,] deltaW = Extensions.DotProduct(layers[i].inputs.Transpose(), delta);
+
+                err = Extensions.DotProduct(delta, layers[i].weights.Transpose());
+                if (layers[i].bias) // If there's bias, the term going to the bias neuron needs to be removed
+                {
+                    double[,] tmp2 = err;
+                    err = new double[tmp2.GetLength(0), tmp2.GetLength(1) - 1];
+                    for (int j = 0; j < err.GetLength(0); j++)
+                        for (int k = 0; k < err.GetLength(1); k++)
+                            err[j, k] = tmp2[j, k];
+                }
+
+                for (int j = 0; j < layers[i].weights.Length; j++)
+                {
+                    int x = j % layers[i].weights.GetLength(0);
+                    int y = j / layers[i].weights.GetLength(0);
+
+                    layers[i].weights[x, y] -= lr * deltaW[x, y];
+                }
+            }
         }
 
         // Randomize weights (between 1 and 0)

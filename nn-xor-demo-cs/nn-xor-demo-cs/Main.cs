@@ -67,6 +67,9 @@ namespace nn_xor_demo_cs
                     case "resetWeights":
                         model.ResetWeights();
                         break;
+                    case "trainOne":
+                        model.BackProp(trainingLabels, 0.01);
+                        break;
                     case "exit":
                         consoleThread.Abort();
                         this.Close();
