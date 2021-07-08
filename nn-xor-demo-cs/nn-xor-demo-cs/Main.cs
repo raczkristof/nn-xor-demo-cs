@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -24,7 +24,9 @@ namespace nn_xor_demo_cs
         double[,] trainingInput; // Data to be used as input to the NN
         double[] trainingLabels; // Labels of the input data
 
-        const int TrainingDataNum = 500; // Number of training datapoints.
+        const int TRAININGDATANUM = 500; // Number of training datapoints.
+        const int TRAININGEPOCHS = 5000; // Number of epochs to train
+        const int FEEDBACKEPOCHS = 50; // Number of epochs to give feedback
 
         NNModel model; // Neural Network model
 
@@ -32,7 +34,7 @@ namespace nn_xor_demo_cs
         {
             InitializeComponent();
 
-            model = new NNModel(2, new int[] { 5, 13, 24, 7, 1 }, new ActivationFunctions[] { ActivationFunctions.Sigmoid, ActivationFunctions.Sigmoid, ActivationFunctions.Sigmoid, ActivationFunctions.Sigmoid, ActivationFunctions.Sigmoid });
+            model = new NNModel(2, new int[] { 10, 1 }, new ActivationFunctions[] { ActivationFunctions.Sigmoid, ActivationFunctions.Sigmoid});
 
             isRunning = true;
 
@@ -69,6 +71,25 @@ namespace nn_xor_demo_cs
                         break;
                     case "trainOne":
                         model.BackProp(trainingLabels, 0.01);
+                        break;
+                    case "train":
+                        if (trainingLabels == null) GenerateXORData(TRAININGDATANUM);
+                        if (model == null)
+                        {
+                            Console.WriteLine("No network initialised.");
+                            break;
+                        }
+                        for (int i = 0; i < TRAININGEPOCHS; i++)
+                        {
+                            double[] predLabels = model.Predict(trainingInput).Flatten();
+                            model.BackProp(trainingLabels, 0.005);
+                            if (i % FEEDBACKEPOCHS == 0)
+                            {
+                                chart1.SetDataPlot(trainingInput, predLabels);
+                                chart1.Refresh();
+                                Console.WriteLine("C = {0}", Extensions.BinaryCrossEntropy(trainingLabels, predLabels));
+                            }
+                        }
                         break;
                     case "exit":
                         consoleThread.Abort();
@@ -147,11 +168,11 @@ namespace nn_xor_demo_cs
                     break;
 
                 case "trainData":
-                    if (trainingLabels == null) GenerateXORData(TrainingDataNum);
+                    if (trainingLabels == null) GenerateXORData(TRAININGDATANUM);
                     chart1.SetDataPlot(trainingInput, trainingLabels);
                     break;
                 case "predictData":
-                    if (trainingLabels == null) GenerateXORData(TrainingDataNum);
+                    if (trainingLabels == null) GenerateXORData(TRAININGDATANUM);
                     if (model == null)
                     {
                         Console.WriteLine("No network initialised.");

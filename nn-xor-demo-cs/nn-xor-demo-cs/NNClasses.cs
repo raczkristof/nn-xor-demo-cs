@@ -124,7 +124,7 @@ namespace nn_xor_demo_cs
             this.activationType = activationType;
             this.bias = bias;
 
-            this.weights = new double[nInputs + Convert.ToInt32(bias), nNeurons]; // TODO weight initialization
+            this.weights = new double[nInputs + Convert.ToInt32(bias), nNeurons];
         }
 
         public double[,] Propagate(double[,] inputs)
