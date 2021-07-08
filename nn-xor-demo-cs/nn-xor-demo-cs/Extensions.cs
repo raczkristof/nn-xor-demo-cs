@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -57,8 +57,8 @@ namespace nn_xor_demo_cs
             trueData.ChartType = SeriesChartType.Point;
 
             for (int i = 0; i < labels.Length; i++)
-                if (labels[i] > 0.5) trueData.Points.AddXY(dataPoints[0, i], dataPoints[1, i]);  // Add points with 1 label to true data series
-                else falseData.Points.AddXY(dataPoints[0, i], dataPoints[1, i]);                // Add points with 0 label to false data series
+                if (labels[i] > 0.5) trueData.Points.AddXY(dataPoints[i, 0], dataPoints[i, 1]);  // Add points with 1 label to true data series
+                else falseData.Points.AddXY(dataPoints[i, 0], dataPoints[i, 1]);                // Add points with 0 label to false data series
 
             chart.Legends[0].Enabled = false; //Turn off legends
             falseData.Color = System.Drawing.Color.Blue;
@@ -81,16 +81,17 @@ namespace nn_xor_demo_cs
         }
 
         // Append a bottom row of ones for bias
-        public static double[,] AppendRowOnes(this double[,] matrix)
+        public static double[,] AppendColOnes(this double[,] matrix)
         {
-            double[,] output = new double[matrix.GetLength(0) + 1, matrix.GetLength(1)];
+            double[,] output = new double[matrix.GetLength(0), matrix.GetLength(1) + 1];
 
             for (int i = 0; i < matrix.GetLength(0); i++)
+            {
                 for (int j = 0; j < matrix.GetLength(1); j++)
                     output[i, j] = matrix[i, j];
 
-            for (int j = 0; j < matrix.GetLength(1); j++)
-                output[output.GetLength(0)-1, j] = 1.0;
+                output[i, output.GetLength(1) - 1] = 1.0;
+            }
 
             return output;
         }
@@ -98,11 +99,11 @@ namespace nn_xor_demo_cs
         // Flatten a 1 by m matrix to a vector
         public static double[] Flatten(this double[,] matrix)
         {
-            if (matrix.GetLength(0) != 1) throw new ArgumentException("The given matrix is not a one-row matrix.");
+            if (matrix.GetLength(1) != 1) throw new ArgumentException("The given matrix is not a one-column matrix.");
             else
             {
-                double[] vector = new double[matrix.GetLength(1)];
-                for (int i = 0; i < vector.Length; i++) vector[i] = matrix[0, i];
+                double[] vector = new double[matrix.GetLength(0)];
+                for (int i = 0; i < vector.Length; i++) vector[i] = matrix[i, 0];
 
                 return vector;
             }

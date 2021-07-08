@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,6 +45,18 @@ namespace nn_xor_demo_cs
             }
         }
 
+        // Predict the label based on the inputs
+        public double[,] Predict(double[,] inputs)
+        {
+            double[,] output = layers[0].Propagate(inputs);
+            for (int i = 1; i < layers.Length; i++)
+            {
+                output = layers[i].Propagate(output);
+            }
+
+            return output;
+        }
+
         // Randomize weights (between 1 and 0)
         public void ResetWeights()
         {
@@ -58,23 +70,13 @@ namespace nn_xor_demo_cs
             foreach (NNLayer layer in layers) layer.RandomizeWeights(rnd);
         }
 
-        public double[,] Predict(double[,] inputs)
-        {
-            layers[0].Propagate(inputs);
-            for (int i = 1; i < layers.Length; i++)
-            {
-                layers[i].Propagate(layers[i - 1].output);
-            }
-
-            return layers.Last().output;
-        }
     }
 
     public class NNLayer
     {
         public int nInputs;
         public double[,] weights;
-        public double[,] output;
+        public double[,] inputs;
 
         public ActivationFunctions activationType;
         public bool bias;
@@ -85,19 +87,27 @@ namespace nn_xor_demo_cs
             this.activationType = activationType;
             this.bias = bias;
 
-            this.weights = new double[nNeurons, nInputs + Convert.ToInt32(bias)]; // TODO weight initialization
+            this.weights = new double[nInputs + Convert.ToInt32(bias), nNeurons]; // TODO weight initialization
         }
 
-        public void Propagate(double[,] inputs)
+        public double[,] Propagate(double[,] inputs)
         {
             // See if we recieved the correct dimension of input.
             // if bias = true, it gets converted to 1, else it gets converted to 0.
-            if (inputs.GetLength(0) != nInputs) throw new ArgumentException("Number of inputs does not equal the specified input size of the layer.");
+            if (inputs.GetLength(1) != nInputs) throw new ArgumentException("Number of inputs does not equal the specified input size of the layer.");
             else
             {
-                if (bias) output = Extensions.DotProduct(weights, inputs.AppendRowOnes()).Activate(activationType);
-                else output = Extensions.DotProduct(weights, inputs).Activate(activationType);
+                this.inputs = inputs;
+                if (bias) this.inputs = inputs.AppendColOnes();
+                else this.inputs = inputs;
+
+                return Extensions.DotProduct(this.inputs, weights).Activate(activationType);
             }
+        }
+
+        public double[,] GetOutput()
+        {
+                return Extensions.DotProduct(inputs, weights).Activate(activationType); ;
         }
 
         public void RandomizeWeights(Random rnd)

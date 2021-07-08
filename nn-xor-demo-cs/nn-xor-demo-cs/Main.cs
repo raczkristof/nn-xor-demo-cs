@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -81,9 +81,9 @@ namespace nn_xor_demo_cs
         private void DrawPlot(string plotType)
         {
             double[] tmp = Enumerable.Range(-500, 1001).Select(x => x / 100.0).ToArray();
-            double[,] input = new double[1, tmp.Length];
+            double[,] input = new double[tmp.Length, 1];
 
-            for (int i = 0; i < tmp.Length; i++) input[0, i] = tmp[i];
+            for (int i = 0; i < tmp.Length; i++) input[i, 0] = tmp[i];
 
             switch (plotType)
             {
@@ -164,7 +164,7 @@ namespace nn_xor_demo_cs
         }
         private void GenerateXORData(int n)
         {
-            trainingInput = new double[2, n];
+            trainingInput = new double[n, 2];
             trainingLabels = new double[n];
 
             Random rnd = new Random();
@@ -174,8 +174,8 @@ namespace nn_xor_demo_cs
                 double x = rnd.NextDouble();
                 double y = rnd.NextDouble();
 
-                trainingInput[0, i] = x;
-                trainingInput[1, i] = y;
+                trainingInput[i, 0] = x;
+                trainingInput[i, 1] = y;
 
                 if ((x - 0.05 + rnd.NextDouble() * 0.1 > 0.5) ^ (y - 0.05 + rnd.NextDouble() * 0.1 > 0.5)) // ^ is XOR operator. added random is used to fuzz edges a bit (false labeling)
                     trainingLabels[i] = 1;
