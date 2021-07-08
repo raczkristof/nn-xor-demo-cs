@@ -199,16 +199,28 @@ namespace nn_xor_demo_cs
             Console.WriteLine(String.Format("Actual result of DotProduct(vector1, vector2) is {0}.", Extensions.DotProduct(vect1, vect2)));
 
             Console.WriteLine();
-            Console.WriteLine("Testing Dot product of vector and matrix.");
+            Console.WriteLine("Testing Dot product of matrix and vector.");
+
+            double[,] matrix = new double[,] { { 3, 54 }, { 5, 9 } };
+            Console.WriteLine(String.Format("matrix is [{0} {1}; {2} {3}]", matrix[0, 0], matrix[0, 1], matrix[1, 0], matrix[1, 1]));
 
             double[] vect = new double[] { 42, 2 };
             Console.WriteLine(String.Format("vector is [{0} {1}]", vect[0], vect[1]));
 
-            double[,] matrix = new double[,] { { 3, 54 }, { 5, 9 } };
+            Console.WriteLine(String.Format("Expected result of DotProduct(matrix, vector) is [{0}; {1}].", matrix[0, 0] * vect[0] + matrix[0, 1] * vect[1], matrix[1, 0] * vect[0] + matrix[1, 1] * vect[1]));
+            double[] resultVec = Extensions.DotProduct(matrix, vect);
+            Console.WriteLine(String.Format("Actual result of DotProduct(matrix, vector) is [{0}; {1}].", resultVec[0], resultVec[1]));
+
+            Console.WriteLine();
+            Console.WriteLine("Testing Dot product of vector and matrix.");
+
+            Console.WriteLine(String.Format("vector is [{0} {1}]", vect[0], vect[1]));
+
             Console.WriteLine(String.Format("matrix is [{0} {1}; {2} {3}]", matrix[0,0], matrix[0,1], matrix[1,0], matrix[1,1]));
 
-            Console.WriteLine(String.Format("Expected result of DotProduct(matrix, vector) is [{0} {1}].", matrix[0, 0] * vect[0] + matrix[0, 1] * vect[1], matrix[1, 0] * vect[0] + matrix[1, 1] * vect[1]));
-            Console.WriteLine(String.Format("Actual result of DotProduct(matrix, vector) is [{0}, {1}].", Extensions.DotProduct(matrix, vect)[0], Extensions.DotProduct(matrix, vect)[1]));
+            Console.WriteLine(String.Format("Expected result of DotProduct(vector, matrix) is [{0} {1}].", vect[0] * matrix[0, 0] + vect[1] * matrix[1, 0], vect[0] * matrix[0, 1] + vect[1] * matrix[1, 1]));
+            resultVec = Extensions.DotProduct(vect, matrix);
+            Console.WriteLine(String.Format("Actual result of DotProduct(vector, matrix) is [{0} {1}].", resultVec[0], resultVec[1]));
 
             Console.WriteLine();
             Console.WriteLine("Testing Dot product of 2 matrices");
@@ -220,8 +232,8 @@ namespace nn_xor_demo_cs
             Console.WriteLine(String.Format("matrixRight is [{0} {1}; {2} {3}]", matrixRight[0, 0], matrixRight[0, 1], matrixRight[1, 0], matrixRight[1, 1]));
 
             Console.WriteLine(String.Format("Expected result of DotProduct(matrix, vector) is [{0} {1}; {2} {3}].", matrixLeft[0, 0] * matrixRight[0, 0] + matrixLeft[0, 1] * matrixRight[1, 0], matrixLeft[0, 0] * matrixRight[0, 1] + matrixLeft[0, 1] * matrixRight[1, 1], matrixLeft[1, 0] * matrixRight[0, 0] + matrixLeft[1, 1] * matrixRight[1, 0], matrixLeft[1, 0] * matrixRight[0, 1] + matrixLeft[1, 1] * matrixRight[1, 1]));
-            double[,] result = Extensions.DotProduct(matrixLeft, matrixRight);
-            Console.WriteLine(String.Format("Actual result of DotProduct(matrix, vector) is [{0} {1}; {2} {3}]].", result[0, 0], result[0, 1], result[1, 0], result[1, 1]));
+            double[,] resultMat = Extensions.DotProduct(matrixLeft, matrixRight);
+            Console.WriteLine(String.Format("Actual result of DotProduct(matrix, vector) is [{0} {1}; {2} {3}]].", resultMat[0, 0], resultMat[0, 1], resultMat[1, 0], resultMat[1, 1]));
         }
     }
 }

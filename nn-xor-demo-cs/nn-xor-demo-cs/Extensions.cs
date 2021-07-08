@@ -109,6 +109,18 @@ namespace nn_xor_demo_cs
             }
         }
 
+        // Transpose matrix
+        public static double[,] Transpose(this double[,] matrix)
+        {
+            double[,] transposed = new double[matrix.GetLength(1), matrix.GetLength(0)];
+
+            for (int i = 0; i < matrix.GetLength(0); i++)
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                    transposed[j, i] = matrix[i, j];
+
+            return transposed;
+        }
+
         // Multiply two vectors
         public static double DotProduct(double[] vect1, double[] vect2)
         {
@@ -117,14 +129,41 @@ namespace nn_xor_demo_cs
                 return Enumerable.Range(0, vect1.Length).Select(x => vect1[x] * vect2[x]).Sum();
         }
 
-        // Multiply a vector with an appropriately sized matrix.
+        // Multiply a matrix with an appropriately sized vector.
         public static double[] DotProduct(double[,] matrix, double[] vector)
         {
-            if (matrix.GetLength(1) != vector.Length) throw new ArgumentException("Vector and Matrix sizes are incosistent for Dot product.");
+            if (matrix.GetLength(1) != vector.Length) throw new ArgumentException("Matrix and vector sizes are incosistent for Dot product.");
             else
             { 
                 // Iterate oever the rows of the matrix. In each row, get the DotProduct for the row and the vector (scalar result)
-                return Enumerable.Range(0, matrix.GetLength(0)).Select(x => Enumerable.Range(0, matrix.GetLength(1)).Select(y => matrix[x,y]*vector[y]).Sum()).ToArray();
+                return Enumerable.Range(0, matrix.GetLength(0)).Select(x => Enumerable.Range(0, vector.Length).Select(y => matrix[x,y]*vector[y]).Sum()).ToArray();
+            }
+        }
+
+        // Multiply a vector with an appropriately sized matrix.
+        public static double[] DotProduct(double[] vector, double[,] matrix)
+        {
+            if (matrix.GetLength(0) != vector.Length) throw new ArgumentException("Vector and Matrix sizes are incosistent for Dot product.");
+            else
+            {
+                // Iterate oever the rows of the matrix. In each row, get the DotProduct for the row and the vector (scalar result)
+                return Enumerable.Range(0, matrix.GetLength(1)).Select(y => Enumerable.Range(0, vector.Length).Select(x => matrix[x, y] * vector[x]).Sum()).ToArray();
+            }
+        }
+
+        // Element-wise multiplication implemented for same size matrices
+        public static double[,] Multiply(double[,] matrix1, double[,] matrix2)
+        {
+            if ((matrix1.GetLength(0) != matrix2.GetLength(0)) || (matrix1.GetLength(1) != matrix2.GetLength(1))) throw new ArgumentException("I wasn't prepared for that :(.");
+            else 
+            {
+                double[,] output = new double[matrix1.GetLength(0), matrix1.GetLength(1)];
+
+                for (int i = 0; i < matrix1.GetLength(0); i++)
+                    for (int j = 0; j < matrix1.GetLength(1); j++)
+                        output[i, j] = matrix2[i, j] * matrix1[i, j];
+
+                return output;
             }
         }
 
