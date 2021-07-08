@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -107,6 +107,12 @@ namespace nn_xor_demo_cs
 
                 return vector;
             }
+        }
+
+        // Simplified implementation for when the output has a single category => one output neuron
+        public static double BinaryCrossEntropy(double[] trueLabels, double[] predLabels)
+        {
+            return -1 * Enumerable.Range(0, trueLabels.Length).Select(i => trueLabels[i] * Math.Log(predLabels[i]) + (1 - trueLabels[i]) * Math.Log(1 - predLabels[i])).Sum() / trueLabels.Length;
         }
 
         // Transpose matrix

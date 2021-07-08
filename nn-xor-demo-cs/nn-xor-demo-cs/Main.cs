@@ -154,7 +154,9 @@ namespace nn_xor_demo_cs
                         Console.WriteLine("No network initialised.");
                         break;
                     }
-                    chart1.SetDataPlot(trainingInput, model.Predict(trainingInput).Flatten());
+                    double[] predLabels = model.Predict(trainingInput).Flatten();
+                    chart1.SetDataPlot(trainingInput, predLabels);
+                    Console.WriteLine("C = {0}", Extensions.BinaryCrossEntropy(trainingLabels, predLabels));
                     break;
 
                 default:
