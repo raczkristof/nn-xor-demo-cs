@@ -57,15 +57,15 @@ namespace nn_xor_demo_cs
             return output;
         }
 
-        public void BackProp(double[] trueLabels, double lr)
+        public void BackProp(double[,] trueLabels, double lr)
         {
-            double[] predLabels = layers.Last().GetOutput().Flatten();
+            double[,] predLabels = layers.Last().GetOutput();
             double cost = Extensions.BinaryCrossEntropy(trueLabels, predLabels);
 
-            double[] tmp = Enumerable.Range(0, trueLabels.Length).Select(i => (trueLabels[i]/predLabels[i] - (1 - trueLabels[i]) / (1 - predLabels[i])) * (- 1)).ToArray();
-            double[,] err = new double[tmp.Length, 1];
-
-            for (int i = 0; i < tmp.Length; i++) err[i, 0] = tmp[i];
+            double[,] err = new double[trueLabels.GetLength(0), trueLabels.GetLength(1)];
+            for (int i = 0; i < err.GetLength(0); i++)
+                for (int j = 0; j < err.GetLength(1); j++)
+                    err[i, j] = (trueLabels[i, j] / predLabels[i, j] - (1 - trueLabels[i, j]) / (1 - predLabels[i, j])) * (-1);
 
             for (int i = layers.Length - 1; i >= 0; i--)
             {

@@ -22,7 +22,7 @@ namespace nn_xor_demo_cs
         private delegate void ConsoleCmd(string cmd);
 
         double[,] trainingInput; // Data to be used as input to the NN
-        double[] trainingLabels; // Labels of the input data
+        double[,] trainingLabels; // Labels of the input data
 
         const int TRAININGDATANUM = 500; // Number of training datapoints.
         const int TRAININGEPOCHS = 5000; // Number of epochs to train
@@ -70,8 +70,17 @@ namespace nn_xor_demo_cs
                         model.ResetWeights();
                         break;
                     case "trainOne":
-                        model.BackProp(trainingLabels, 0.01);
-                        break;
+                        if (trainingLabels == null) GenerateXORData(TRAININGDATANUM);
+                        if (model == null)
+                        {
+                            Console.WriteLine("No network initialised.");
+                            break;
+                        }
+                        else
+                        {
+                            model.BackProp(trainingLabels, 0.01);
+                            break;
+                        }
                     case "train":
                         if (trainingLabels == null) GenerateXORData(TRAININGDATANUM);
                         if (model == null)
@@ -81,11 +90,11 @@ namespace nn_xor_demo_cs
                         }
                         for (int i = 0; i < TRAININGEPOCHS; i++)
                         {
-                            double[] predLabels = model.Predict(trainingInput).Flatten();
+                            double[,] predLabels = model.Predict(trainingInput);
                             model.BackProp(trainingLabels, 0.005);
                             if (i % FEEDBACKEPOCHS == 0)
                             {
-                                chart1.SetDataPlot(trainingInput, predLabels);
+                                chart1.SetDataPlot(trainingInput, predLabels.Flatten());
                                 chart1.Refresh();
                                 Console.WriteLine("C = {0}", Extensions.BinaryCrossEntropy(trainingLabels, predLabels));
                             }
@@ -169,7 +178,7 @@ namespace nn_xor_demo_cs
 
                 case "trainData":
                     if (trainingLabels == null) GenerateXORData(TRAININGDATANUM);
-                    chart1.SetDataPlot(trainingInput, trainingLabels);
+                    chart1.SetDataPlot(trainingInput, trainingLabels.Flatten());
                     break;
                 case "predictData":
                     if (trainingLabels == null) GenerateXORData(TRAININGDATANUM);
@@ -178,8 +187,8 @@ namespace nn_xor_demo_cs
                         Console.WriteLine("No network initialised.");
                         break;
                     }
-                    double[] predLabels = model.Predict(trainingInput).Flatten();
-                    chart1.SetDataPlot(trainingInput, predLabels);
+                    double[,] predLabels = model.Predict(trainingInput);
+                    chart1.SetDataPlot(trainingInput, predLabels.Flatten());
                     Console.WriteLine("C = {0}", Extensions.BinaryCrossEntropy(trainingLabels, predLabels));
                     break;
 
@@ -191,7 +200,7 @@ namespace nn_xor_demo_cs
         private void GenerateXORData(int n)
         {
             trainingInput = new double[n, 2];
-            trainingLabels = new double[n];
+            trainingLabels = new double[n,1];
 
             Random rnd = new Random();
 
@@ -204,9 +213,9 @@ namespace nn_xor_demo_cs
                 trainingInput[i, 1] = y;
 
                 if ((x - 0.05 + rnd.NextDouble() * 0.1 > 0.5) ^ (y - 0.05 + rnd.NextDouble() * 0.1 > 0.5)) // ^ is XOR operator. added random is used to fuzz edges a bit (false labeling)
-                    trainingLabels[i] = 1;
+                    trainingLabels[i,0] = 1;
                 else
-                    trainingLabels[i] = 0;
+                    trainingLabels[i,0] = 0;
             }
         }
 
