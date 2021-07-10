@@ -127,6 +127,32 @@ namespace nn_xor_demo_cs
             }
         }
 
+        // Implementation of Accuracy for classification problems
+        public static double Accuracy(double[,] trueLabels, double[,] predLabels)
+        {
+            if ((trueLabels.GetLength(0) != predLabels.GetLength(0)) || (trueLabels.GetLength(1) != predLabels.GetLength(1))) throw new ArgumentException("True and predicted labels are not the same size.");
+            else
+            {
+                double ACC = 0;
+                for (int i = 0; i < trueLabels.GetLength(0); i++)    // Iterate over all samples
+                {
+                    bool match = true;
+                    for (int j = 0; j < trueLabels.GetLength(1); j++)
+                    {
+                        if (Math.Round(trueLabels[i, j]) != Math.Round(predLabels[i, j]))
+                        {
+                            match = false;
+                            break;
+                        }
+                    }
+                    if (match)
+                        ACC += 1;
+                }
+                // Return ACC percentage
+                return ACC / trueLabels.GetLength(0);
+            }
+        }
+
         // Transpose matrix
         public static double[,] Transpose(this double[,] matrix)
         {
