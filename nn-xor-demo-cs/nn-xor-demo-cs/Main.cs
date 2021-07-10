@@ -44,6 +44,7 @@ namespace nn_xor_demo_cs
             consoleThread = new Thread(() => {
                 while (isRunning)
                 {
+                    Console.Write(">");
                     string cmd = Console.ReadLine();
                     this.Invoke(d, cmd);
                 }
@@ -182,7 +183,7 @@ namespace nn_xor_demo_cs
                     }
                     double[,] predLabels = model.Predict(trainingInput);
                     chart1.SetDataPlot(trainingInput, predLabels.Flatten());
-                    Console.WriteLine("C = {0}", Extensions.BinaryCrossEntropy(trainingLabels, predLabels));
+                    Console.WriteLine("Accuracy:{0:P2}, BCE cost:{1:F5}", Extensions.Accuracy(trainingLabels, predLabels), Extensions.BinaryCrossEntropy(trainingLabels, predLabels));
                     break;
 
                 default:
@@ -266,18 +267,43 @@ namespace nn_xor_demo_cs
         }
 
         private void TrainNetwork(NNModel model, double[,] trainingInput, double[,] trainingLabels, int epochs, int feedbackEpochs, double lr = 0.01)
-        {          
+        {
+            var watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
+
+            Console.WriteLine();
+            Console.WriteLine("Training NN model with {0} learning rate, {1} training inputs for {2} epochs.", lr, trainingLabels.GetLength(0), epochs);
+
             for (int i = 0; i < epochs; i++)
             {
                 double[,] predLabels = model.Predict(trainingInput);
                 model.BackProp(trainingLabels, lr);
-                if (i % feedbackEpochs == 0)
+                if ((i + 1) % feedbackEpochs == 0)
                 {
+                    double BCE = Extensions.BinaryCrossEntropy(trainingLabels, predLabels);
+                    double ACC = Extensions.Accuracy(trainingLabels, predLabels);
+                    int compPercent = (i+1) / (epochs / 20); // how many units of 5% is already done
+                    char[] progBar = new char[] { '[' };
+                    for (int j = 0; j < 20; j++)
+                    {
+                        if (j < compPercent) progBar = progBar.Append('X').ToArray();
+                        else progBar = progBar.Append('-').ToArray();
+                    }
+                    progBar = progBar.Append(']').ToArray();
+
+                    Console.Write("\r"); // Reset cursor to start of the line
+                    Console.Write(progBar); // Progress bar.
+                    Console.Write(" Epoch {0}/{1}, Accuracy:{2:P2}, BCE cost:{3:F5}", i+1, epochs, ACC, BCE);
+
                     chart1.SetDataPlot(trainingInput, predLabels.Flatten());
                     chart1.Refresh();
-                    Console.WriteLine("C = {0}", Extensions.BinaryCrossEntropy(trainingLabels, predLabels));
                 }
             }
+            Console.WriteLine();
+
+            watch.Stop();
+            Console.WriteLine("Training finished in {0} min {1}.{2} sec.", watch.Elapsed.Minutes, watch.Elapsed.Seconds, watch.Elapsed.Milliseconds/10);
+            Console.WriteLine();
         }
 }
 }
