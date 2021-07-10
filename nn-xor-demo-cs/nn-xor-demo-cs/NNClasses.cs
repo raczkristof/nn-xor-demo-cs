@@ -8,7 +8,7 @@ namespace nn_xor_demo_cs
 {
     public class NNModel
     {
-        private NNLayer[] layers;
+        private FCLayer[] layers;
         private int nInputs;
 
         public NNModel(int nInputs, int[] layerSizes, ActivationFunctions[] layerActivations)
@@ -19,11 +19,11 @@ namespace nn_xor_demo_cs
             }
             else
             {
-                this.layers = new NNLayer[layerSizes.Length];
+                this.layers = new FCLayer[layerSizes.Length];
                 this.nInputs = nInputs;
 
-                this.layers[0] = new NNLayer(layerSizes[0], nInputs, layerActivations[0]);
-                for (int i = 1; i < layerSizes.Length; i++) this.layers[i] = new NNLayer(layerSizes[i], layerSizes[i - 1], layerActivations[i]);
+                this.layers[0] = new FCLayer(layerSizes[0], nInputs, layerActivations[0]);
+                for (int i = 1; i < layerSizes.Length; i++) this.layers[i] = new FCLayer(layerSizes[i], layerSizes[i - 1], layerActivations[i]);
                 this.ResetWeights();
             }
         }
@@ -36,11 +36,11 @@ namespace nn_xor_demo_cs
             }
             else
             {
-                this.layers = new NNLayer[layerSizes.Length];
+                this.layers = new FCLayer[layerSizes.Length];
                 this.nInputs = nInputs;
 
-                this.layers[0] = new NNLayer(layerSizes[0], nInputs, layerActivations[0]);
-                for (int i = 1; i < layerSizes.Length; i++) this.layers[i] = new NNLayer(layerSizes[i], layerSizes[i - 1], layerActivations[i]);
+                this.layers[0] = new FCLayer(layerSizes[0], nInputs, layerActivations[0]);
+                for (int i = 1; i < layerSizes.Length; i++) this.layers[i] = new FCLayer(layerSizes[i], layerSizes[i - 1], layerActivations[i]);
                 this.ResetWeights(seed);
             }
         }
@@ -69,28 +69,7 @@ namespace nn_xor_demo_cs
 
             for (int i = layers.Length - 1; i >= 0; i--)
             {
-                double[,] dactivation = Extensions.DotProduct(layers[i].inputs, layers[i].weights).Derivative(layers[i].activationType);
-                double[,] delta = Extensions.Multiply(err, dactivation);
-
-                double[,] deltaW = Extensions.DotProduct(layers[i].inputs.Transpose(), delta);
-
-                err = Extensions.DotProduct(delta, layers[i].weights.Transpose());
-                if (layers[i].bias) // If there's bias, the term going to the bias neuron needs to be removed
-                {
-                    double[,] tmp2 = err;
-                    err = new double[tmp2.GetLength(0), tmp2.GetLength(1) - 1];
-                    for (int j = 0; j < err.GetLength(0); j++)
-                        for (int k = 0; k < err.GetLength(1); k++)
-                            err[j, k] = tmp2[j, k];
-                }
-
-                for (int j = 0; j < layers[i].weights.Length; j++)
-                {
-                    int x = j % layers[i].weights.GetLength(0);
-                    int y = j / layers[i].weights.GetLength(0);
-
-                    layers[i].weights[x, y] -= lr * deltaW[x, y];
-                }
+                err = layers[i].BackPropagate(err, lr);
             }
         }
 
@@ -98,18 +77,18 @@ namespace nn_xor_demo_cs
         public void ResetWeights()
         {
             Random rnd = new Random();
-            foreach (NNLayer layer in layers) layer.RandomizeWeights(rnd);
+            foreach (FCLayer layer in layers) layer.RandomizeWeights(rnd);
         }
 
         public void ResetWeights(int seed)
         {
             Random rnd = new Random(seed);
-            foreach (NNLayer layer in layers) layer.RandomizeWeights(rnd);
+            foreach (FCLayer layer in layers) layer.RandomizeWeights(rnd);
         }
 
     }
 
-    public class NNLayer
+    public class FCLayer
     {
         public int nInputs;
         public double[,] weights;
@@ -118,7 +97,7 @@ namespace nn_xor_demo_cs
         public ActivationFunctions activationType;
         public bool bias;
 
-        public NNLayer(int nNeurons, int nInputs, ActivationFunctions activationType, bool bias=true)
+        public FCLayer(int nNeurons, int nInputs, ActivationFunctions activationType, bool bias=true)
         {
             this.nInputs = nInputs;
             this.activationType = activationType;
@@ -140,6 +119,30 @@ namespace nn_xor_demo_cs
 
                 return Extensions.DotProduct(this.inputs, weights).Activate(activationType);
             }
+        }
+
+        public double[,] BackPropagate(double[,] layerErr, double lr)
+        {
+            double[,] dactivation = Extensions.DotProduct(inputs, weights).Derivative(activationType);
+            double[,] delta = Extensions.Multiply(layerErr, dactivation);
+
+            double[,] deltaW = Extensions.DotProduct(inputs.Transpose(), delta);
+
+            layerErr = Extensions.DotProduct(delta, weights.Transpose());
+            if (bias) // If there's bias, the term going to the bias neuron needs to be removed
+            {
+                double[,] tmp2 = layerErr;
+                layerErr = new double[tmp2.GetLength(0), tmp2.GetLength(1) - 1];
+                for (int i = 0; i < layerErr.GetLength(0); i++)
+                    for (int j = 0; j < layerErr.GetLength(1); j++)
+                        layerErr[i, j] = tmp2[i, j];
+            }
+
+            for (int i = 0; i < weights.GetLength(0); i++)
+                for (int j = 0; j < weights.GetLength(1); j++)
+                    weights[i, j] -= lr * deltaW[i, j];
+
+            return layerErr;
         }
 
         public double[,] GetOutput()
@@ -165,9 +168,7 @@ namespace nn_xor_demo_cs
     public static class Activations
     {
         //Unity activation function.The implementation is inefficient, but represents
-        //the nature of an activation function better then "return input". Shows the
-        //general implementation scheme for using LINQ to perform the calcualtion on
-        //all elements of the array.
+        //the nature of an activation function better then "return input".
         public static double[,] Identity(this double[,] input, bool deriv = false)
         {
             double[,] output = new double[input.GetLength(0), input.GetLength(1)];

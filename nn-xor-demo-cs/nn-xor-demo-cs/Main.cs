@@ -88,18 +88,11 @@ namespace nn_xor_demo_cs
                             Console.WriteLine("No network initialised.");
                             break;
                         }
-                        for (int i = 0; i < TRAININGEPOCHS; i++)
+                        else
                         {
-                            double[,] predLabels = model.Predict(trainingInput);
-                            model.BackProp(trainingLabels, 0.005);
-                            if (i % FEEDBACKEPOCHS == 0)
-                            {
-                                chart1.SetDataPlot(trainingInput, predLabels.Flatten());
-                                chart1.Refresh();
-                                Console.WriteLine("C = {0}", Extensions.BinaryCrossEntropy(trainingLabels, predLabels));
-                            }
+                            TrainNetwork(model, trainingInput, trainingLabels, TRAININGEPOCHS, FEEDBACKEPOCHS);
+                            break;
                         }
-                        break;
                     case "exit":
                         consoleThread.Abort();
                         this.Close();
@@ -197,27 +190,6 @@ namespace nn_xor_demo_cs
                     break;
             }
         }
-        private void GenerateXORData(int n)
-        {
-            trainingInput = new double[n, 2];
-            trainingLabels = new double[n,1];
-
-            Random rnd = new Random();
-
-            for (int i = 0; i < n; i++)
-            {
-                double x = rnd.NextDouble();
-                double y = rnd.NextDouble();
-
-                trainingInput[i, 0] = x;
-                trainingInput[i, 1] = y;
-
-                if ((x - 0.05 + rnd.NextDouble() * 0.1 > 0.5) ^ (y - 0.05 + rnd.NextDouble() * 0.1 > 0.5)) // ^ is XOR operator. added random is used to fuzz edges a bit (false labeling)
-                    trainingLabels[i,0] = 1;
-                else
-                    trainingLabels[i,0] = 0;
-            }
-        }
 
         // Arguably a better way to do this would be unit test
         private void TestDot()
@@ -270,5 +242,42 @@ namespace nn_xor_demo_cs
             double[,] resultMat = Extensions.DotProduct(matrixLeft, matrixRight);
             Console.WriteLine(String.Format("Actual result of DotProduct(matrix, vector) is [{0} {1}; {2} {3}]].", resultMat[0, 0], resultMat[0, 1], resultMat[1, 0], resultMat[1, 1]));
         }
-    }
+
+        private void GenerateXORData(int n)
+        {
+            trainingInput = new double[n, 2];
+            trainingLabels = new double[n, 1];
+
+            Random rnd = new Random();
+
+            for (int i = 0; i < n; i++)
+            {
+                double x = rnd.NextDouble();
+                double y = rnd.NextDouble();
+
+                trainingInput[i, 0] = x;
+                trainingInput[i, 1] = y;
+
+                if ((x - 0.05 + rnd.NextDouble() * 0.1 > 0.5) ^ (y - 0.05 + rnd.NextDouble() * 0.1 > 0.5)) // ^ is XOR operator. added random is used to fuzz edges a bit (false labeling)
+                    trainingLabels[i, 0] = 1;
+                else
+                    trainingLabels[i, 0] = 0;
+            }
+        }
+
+        private void TrainNetwork(NNModel model, double[,] trainingInput, double[,] trainingLabels, int epochs, int feedbackEpochs, double lr = 0.01)
+        {          
+            for (int i = 0; i < epochs; i++)
+            {
+                double[,] predLabels = model.Predict(trainingInput);
+                model.BackProp(trainingLabels, lr);
+                if (i % feedbackEpochs == 0)
+                {
+                    chart1.SetDataPlot(trainingInput, predLabels.Flatten());
+                    chart1.Refresh();
+                    Console.WriteLine("C = {0}", Extensions.BinaryCrossEntropy(trainingLabels, predLabels));
+                }
+            }
+        }
+}
 }
