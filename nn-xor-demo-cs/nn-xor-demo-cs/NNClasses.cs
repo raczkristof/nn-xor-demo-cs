@@ -9,7 +9,6 @@ namespace nn_xor_demo_cs
     public class NNModel
     {
         private FCLayer[] layers;
-        private int nInputs;
 
         public NNModel(int nInputs, int[] layerSizes, ActivationFunctions[] layerActivations)
         {
@@ -20,7 +19,6 @@ namespace nn_xor_demo_cs
             else
             {
                 this.layers = new FCLayer[layerSizes.Length];
-                this.nInputs = nInputs;
 
                 this.layers[0] = new FCLayer(layerSizes[0], nInputs, layerActivations[0]);
                 for (int i = 1; i < layerSizes.Length; i++) this.layers[i] = new FCLayer(layerSizes[i], layerSizes[i - 1], layerActivations[i]);
@@ -37,7 +35,6 @@ namespace nn_xor_demo_cs
             else
             {
                 this.layers = new FCLayer[layerSizes.Length];
-                this.nInputs = nInputs;
 
                 this.layers[0] = new FCLayer(layerSizes[0], nInputs, layerActivations[0]);
                 for (int i = 1; i < layerSizes.Length; i++) this.layers[i] = new FCLayer(layerSizes[i], layerSizes[i - 1], layerActivations[i]);
