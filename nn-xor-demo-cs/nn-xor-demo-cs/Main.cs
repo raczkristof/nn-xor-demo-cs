@@ -27,6 +27,7 @@ namespace nn_xor_demo_cs
         const int TRAININGDATANUM = 500; // Number of training datapoints.
         const int TRAININGEPOCHS = 5000; // Number of epochs to train
         const int FEEDBACKEPOCHS = 50; // Number of epochs to give feedback
+        const double LR = 0.01; // Number of epochs to give feedback
 
         NNModel model; // Neural Network model
 
@@ -91,7 +92,7 @@ namespace nn_xor_demo_cs
                         }
                         else
                         {
-                            TrainNetwork(model, trainingInput, trainingLabels, TRAININGEPOCHS, FEEDBACKEPOCHS);
+                            TrainNetwork(model, trainingInput, trainingLabels, TRAININGEPOCHS, FEEDBACKEPOCHS, LR);
                             break;
                         }
                     case "exit":
